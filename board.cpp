@@ -73,6 +73,8 @@ bool BattleShip::board::place_ship(int row, int col, int place_method, int size,
  * @return hit is valid
  */
 bool BattleShip::board::hit(int row, int col, bool *is_hit) {
+    if (is_hit == nullptr)
+        is_hit = new bool;
     //in range || valid hit
     if (!isInRange(row, col) || this->arr[row][col].i == BattleShip::HIT ||
         this->arr[row][col].i == BattleShip::EMPTY_HIT) {
@@ -114,4 +116,12 @@ bool BattleShip::board::rowInRange(int row) const {
 
 bool BattleShip::board::colInRange(int col) const {
     return col >= 0 && col < this->col_len;
+}
+
+int BattleShip::board::getRowLen() const {
+    return row_len;
+}
+
+int BattleShip::board::getColLen() const {
+    return col_len;
 }

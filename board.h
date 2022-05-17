@@ -24,9 +24,9 @@ namespace BattleShip {
     class board {
     private:
         ele **arr;
-
-    public:
+    protected:
         int row_len, col_len;
+    public:
 
         board(int row_len, int col_len);
 
@@ -45,6 +45,10 @@ namespace BattleShip {
         char get_type(int row, int col);
 
         int get_ship_idx(int row, int col);
+
+        int getRowLen() const;
+
+        int getColLen() const;
     };
 }
 

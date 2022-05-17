@@ -70,12 +70,7 @@ void BattleShip::player::place_ship() {
 void BattleShip::player::firing(BattleShip::player *opponent) {
     while (true) {
 
-        cout << name << "'s Firing Board" << endl;
-        opponent->show_board(false);
-        cout << endl;
-        cout << endl;
-        cout << name << "'s Placement Board" << endl;
-        this->show_board(true);
+        show_boards(opponent);
 
         int row, col;
 
@@ -90,31 +85,38 @@ void BattleShip::player::firing(BattleShip::player *opponent) {
         }
 
         bool is_hit = false;
-        if (opponent->board->hit(row, col, &is_hit)) {
-            cout << name << "'s Firing Board" << endl;
-            opponent->show_board(false);
-            cout << endl;
-            cout << endl;
-            cout << name << "'s Placement Board" << endl;
-            this->show_board(true);
-            if (is_hit) {
-                ship *target_ship = &opponent->ships[opponent->board->get_ship_idx(row, col)];
-                target_ship->hit();
-
-                cout << name << " hit " << opponent->name << "'s " << target_ship->getType()
-                     << "!" << endl;
-                if (BattleShip::player::check_ship_hit(*target_ship)) {
-                    cout << name << " destroyed " << opponent->name << "'s "
-                         << opponent->board->get_type(row, col) << "!" << endl;
-                }
-                cout << endl;
-            } else {
-                cout << "Missed." << endl;
-                cout << endl;
-            }
-            break;
-        }
+        bool valid = opponent->board->hit(row, col, &is_hit);
+        if (!valid)
+            continue;
+        show_fire_result(opponent, row, col, is_hit);
+        break;
     }
+}
+
+void BattleShip::player::show_fire_result(BattleShip::player *opponent, int row, int col, bool is_hit) {
+    show_boards(opponent);
+    if (is_hit) {
+        ship *target_ship = &opponent->ships[opponent->board->get_ship_idx(row, col)];
+        target_ship->hit();
+
+        cout << name << " hit " << opponent->name << "'s " << target_ship->getType()
+             << "!" << endl;
+        if (BattleShip::player::check_ship_destroy(*target_ship)) {
+            cout << name << " destroyed " << opponent->name << "'s "
+                 << opponent->board->get_type(row, col) << "!" << endl;
+        }
+        cout << endl;
+    } else {
+        cout << "Missed." << endl << endl;
+    }
+}
+
+void BattleShip::player::show_boards(BattleShip::player *opponent) {
+    cout << name << "'s Firing Board" << endl;
+    opponent->show_board(false);
+    cout << endl << endl;
+    cout << name << "'s Placement Board" << endl;
+    this->show_board(true);
 }
 
 
@@ -124,13 +126,13 @@ void BattleShip::player::firing(BattleShip::player *opponent) {
  */
 void BattleShip::player::show_board(bool show_ship) {
     cout << "  ";
-    for (int i = 0; i < this->board->col_len; i++) {
+    for (int i = 0; i < this->board->getColLen(); i++) {
         cout << i << " ";
     }
     cout << endl;
-    for (int i = 0; i < this->board->row_len; i++) {
+    for (int i = 0; i < this->board->getRowLen(); i++) {
         cout << i << " ";
-        for (int j = 0; j < this->board->col_len; j++) {
+        for (int j = 0; j < this->board->getColLen(); j++) {
             int status_num = this->board->get_status(i, j);
             if (status_num == 0) {
                 cout << "* ";
@@ -170,18 +172,22 @@ bool BattleShip::player::read_row_col(string &input, int &row, int &col) {
     return false;
 }
 
-//true for ship is all hit
-bool BattleShip::player::check_ship_hit(BattleShip::ship ship) {
+//true for ship is destroyed
+bool BattleShip::player::check_ship_destroy(BattleShip::ship ship) {
     return ship.isDead();
 }
 
-//true for all ships hit
-bool BattleShip::player::check_ships_hit() {
+//true for all ships are destroyed
+bool BattleShip::player::check_ships_destroy() {
     for (auto s: this->ships) {
-        if (!check_ship_hit(s))
+        if (!check_ship_destroy(s))
             return false;
     }
     return true;
+}
+
+BattleShip::board *BattleShip::player::getBoard() const {
+    return board;
 }
 
 //string split

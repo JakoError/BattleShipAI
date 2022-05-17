@@ -4,7 +4,6 @@
 #include "board.h"
 #include "ship.h"
 
-
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -28,18 +27,22 @@ namespace BattleShip {
     public:
         player(int row_len, int col_len, int ship_num, const vector <BattleShip::ship> &ships, string name);
 
-        void place_ship();
+        virtual void place_ship();
 
         //block type mark 0 empty 1 ship 2 hit 3 empty_hit
         void show_board(bool show_ship);
 
+        void show_boards(player *opponent);
+
         //true for ship is hit
-        static bool check_ship_hit(BattleShip::ship ship);
+        static bool check_ship_destroy(BattleShip::ship ship);
 
         //true for
-        bool check_ships_hit();
+        bool check_ships_destroy();
 
-        void firing(BattleShip::player *opponent);
+        virtual void firing(BattleShip::player *opponent);
+
+        void show_fire_result(BattleShip::player *opponent,int row,int col, bool is_hit);
 
         const string &getName() const {
             return name;
@@ -48,6 +51,9 @@ namespace BattleShip {
         int getShipNum() const {
             return ship_num;
         }
+
+        BattleShip::board *getBoard() const;
+
     };
 
     //string split
