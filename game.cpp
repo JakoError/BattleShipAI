@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "game.h"
+#include "ai_player.h"
 
 using std::cin;
 using std::cout;
@@ -55,6 +56,7 @@ void BattleShip::game::setup() {
         std::getline(cin, input);
         if (!input.empty() && input.length() <= 20) {
             player2 = new BattleShip::player(row_len, col_len, ship_num, ships, input);
+
             break;
         }
     }
@@ -66,12 +68,12 @@ void BattleShip::game::run() {
     while (true) {
         this->player1->firing(player2);
         if (player2->check_ships_hit()) {
-            cout << player1->name << " won the game!" << endl;
+            cout << player1->getName() << " won the game!" << endl;
             break;
         }
         player2->firing(player1);
         if (player1->check_ships_hit()) {
-            cout << player2->name << " won the game!" << endl;
+            cout << player2->getName() << " won the game!" << endl;
             break;
         }
     }

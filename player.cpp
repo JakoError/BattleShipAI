@@ -84,14 +84,8 @@ void BattleShip::player::firing(BattleShip::player *opponent) {
             cout << name << ", where would you like to fire?" << endl;
             cout << "Enter your attack coordinate in the form row col: ";
             std::getline(cin, input);
-            trim(input);
-            vector<string> strs = split(input, " ");
-            if (strs.size() == 2) {
-                if (isNumber(strs[0]) && isNumber(strs[1])) {
-                    row = (int) strtol(strs[0].c_str(), nullptr, 10);
-                    col = (int) strtol(strs[1].c_str(), nullptr, 10);
-                    break;
-                }
+            if (read_row_col(input, row, col)) {
+                break;
             }
         }
 

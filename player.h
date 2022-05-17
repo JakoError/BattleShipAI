@@ -15,16 +15,17 @@ using std::vector;
 
 namespace BattleShip {
     class player {
-    private:
+    protected:
+        string name;
+        int ship_num;
+
         BattleShip::board *board;
+
         vector <BattleShip::ship> ships;
 
         static bool read_row_col(string &line, int &row, int &col);
 
     public:
-        int ship_num;
-        string name;
-
         player(int row_len, int col_len, int ship_num, const vector <BattleShip::ship> &ships, string name);
 
         void place_ship();
@@ -39,6 +40,14 @@ namespace BattleShip {
         bool check_ships_hit();
 
         void firing(BattleShip::player *opponent);
+
+        const string &getName() const {
+            return name;
+        }
+
+        int getShipNum() const {
+            return ship_num;
+        }
     };
 
     //string split
