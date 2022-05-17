@@ -179,11 +179,9 @@ bool BattleShip::player::check_ship_destroy(BattleShip::ship ship) {
 
 //true for all ships are destroyed
 bool BattleShip::player::check_ships_destroy() {
-    for (auto s: this->ships) {
-        if (!check_ship_destroy(s))
-            return false;
-    }
-    return true;
+    if (std::all_of(this->ships.begin(), this->ships.end(), [](auto s) { return check_ship_destroy(s); }))
+        return true;
+    return false;
 }
 
 BattleShip::board *BattleShip::player::getBoard() const {

@@ -1,4 +1,8 @@
+#include <iostream>
 #include "ai_player.h"
+
+using std::cout;
+using std::endl;
 
 int BattleShip::ai_player::ai_index = 1;
 
@@ -7,7 +11,6 @@ void BattleShip::ai_player::place_ship() {
     std::uniform_int_distribution<int> row_distribution{0, this->board->getRowLen()};
     std::uniform_int_distribution<int> col_distribution{0, this->board->getColLen()};
     for (int i = 0; i < this->ship_num; i++) {
-        show_board(true);
         string input;
         while (true) {
             int place_method = place_method_distribution(rand_generator);
@@ -18,7 +21,9 @@ void BattleShip::ai_player::place_ship() {
                 this->ships[i].setRow(row);
                 this->ships[i].setCol(col);
                 this->ships[i].setPlaceMethod(place_method);
-                this->show_board(true);
+                cout << name << "'s Board" << endl;
+                show_board(true);
+                cout << endl;
                 break;
             }
         }
@@ -34,8 +39,8 @@ vector<BattleShip::coord> BattleShip::ai_player::get_coords(int row_len, int col
         int row_mi = row_len - 1;
         int col_mi = col_len - 1;
         if (full_coords.empty()) {
-            for (int i = 0; i < row_mi + col_mi; ++i) {
-                for (int j = std::max(0, i - row_mi); j < col_mi && j <= i; ++j) {
+            for (int i = 0; i <= row_mi + col_mi; ++i) {
+                for (int j = std::max(0, i - row_mi); j <= col_mi && j <= i; ++j) {
                     full_coords.emplace_back(i - j, j);
                 }
             }
@@ -58,11 +63,12 @@ BattleShip::coord BattleShip::cheat_ai_player::find_next_target(BattleShip::boar
     auto coords = get_coords(opponent_board->getRowLen(), opponent_board->getColLen());
     if (target_crd_idx > coords.size())
         target_crd_idx = 0;
-    while (target_crd_idx++ <= coords.size()) {
+    while (target_crd_idx < coords.size()) {
         auto crd = coords.at(target_crd_idx);
         if (opponent_board->get_status(crd.x, crd.y) == BattleShip::SHIP) {
             return crd;
         }
+        target_crd_idx++;
     }
     exit(-1);
 }
@@ -70,7 +76,7 @@ BattleShip::coord BattleShip::cheat_ai_player::find_next_target(BattleShip::boar
 
 BattleShip::random_ai_player::random_ai_player(int row_len, int col_len, int ship_num,
                                                const vector<BattleShip::ship> &ships) :
-        ai_player(row_len, col_len, ship_num, ships), coords(get_coords(row_len, col_len)) {};
+        ai_player(row_len, col_len, ship_num, ships), coords(get_coords(row_len, col_len)) {}
 
 void BattleShip::random_ai_player::firing(BattleShip::player *opponent) {
     bool is_hit = false;
@@ -81,7 +87,7 @@ void BattleShip::random_ai_player::firing(BattleShip::player *opponent) {
 
 BattleShip::coord BattleShip::random_ai_player::pop_random_coord(vector<coord> v) {
     auto itr = v.begin();
-    std::uniform_int_distribution<int> distribution{0, static_cast<int>(v.size())};
+    std::uniform_int_distribution<int> distribution{0, static_cast<int>(v.size() - 1)};
     auto elementPos = distribution(rand_generator);
     std::advance(itr, elementPos);
     BattleShip::coord pick(*itr);
@@ -96,7 +102,7 @@ void BattleShip::hunt_destroy_ai_player::firing(BattleShip::player *opponent) {
         mode = DESTROY_MODE;
 
     bool is_hit = false;
-    coord target_crd = coord(0, 0);
+    coord target_crd;
     if (mode == HUNT_MODE) {
         target_crd = pop_random_coord(hunt_targets);
         opponent->getBoard()->hit(target_crd.x, target_crd.y, &is_hit);

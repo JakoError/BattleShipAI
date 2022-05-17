@@ -27,7 +27,7 @@ namespace BattleShip {
 
         int mode;
 
-        int ask_get_ai_type();
+        static int ask_get_ai_type();
 
         BattleShip::player *generate_player(int player_type);
 
