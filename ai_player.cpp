@@ -4,18 +4,28 @@
 using std::cout;
 using std::endl;
 
+std::mt19937 BattleShip::ai_player::rand_generator;
+
 int BattleShip::ai_player::ai_index = 1;
 
 void BattleShip::ai_player::place_ship() {
-    std::uniform_int_distribution<int> place_method_distribution{0, 1};
-    std::uniform_int_distribution<int> row_distribution{0, this->board->getRowLen()};
-    std::uniform_int_distribution<int> col_distribution{0, this->board->getColLen()};
     for (int i = 0; i < this->ship_num; i++) {
         string input;
         while (true) {
-            int place_method = place_method_distribution(rand_generator);
-            int row = row_distribution(rand_generator);
-            int col = col_distribution(rand_generator);
+            std::uniform_int_distribution<int> place_method_distribution{0, 1};
+            int place_method = place_method_distribution(ai_player::rand_generator);
+            int row_max, col_max;
+            if (place_method == BattleShip::HORIZONTAL) {
+                row_max = this->board->getRowLen() - 1;
+                col_max = this->board->getColLen() - this->ships[i].getSize();
+            } else {
+                row_max = this->board->getRowLen() - this->ships[i].getSize();
+                col_max = this->board->getColLen() - 1;
+            }
+            std::uniform_int_distribution<int> row_distribution{0, row_max};
+            std::uniform_int_distribution<int> col_distribution{0, col_max};
+            int row = row_distribution(ai_player::rand_generator);
+            int col = col_distribution(ai_player::rand_generator);
             if (this->board->place_ship(row, col, place_method, this->ships[i].getSize(),
                                         this->ships[i].getType(), i)) {
                 this->ships[i].setRow(row);
@@ -31,17 +41,15 @@ void BattleShip::ai_player::place_ship() {
 }
 
 void BattleShip::ai_player::set_random_seed(int seed) {
-    rand_generator = std::minstd_rand(seed);
+    rand_generator = std::mt19937(seed);
 }
 
 vector<BattleShip::coord> BattleShip::ai_player::get_coords(int row_len, int col_len) {
     if (full_coords.size() != row_len * col_len) {
-        int row_mi = row_len - 1;
-        int col_mi = col_len - 1;
         if (full_coords.empty()) {
-            for (int i = 0; i <= row_mi + col_mi; ++i) {
-                for (int j = std::max(0, i - row_mi); j <= col_mi && j <= i; ++j) {
-                    full_coords.emplace_back(i - j, j);
+            for (int i = 0; i < row_len; ++i) {
+                for (int j = 0; j < col_len; ++j) {
+                    full_coords.emplace_back(i, j);
                 }
             }
         }
@@ -80,18 +88,18 @@ BattleShip::random_ai_player::random_ai_player(int row_len, int col_len, int shi
 
 void BattleShip::random_ai_player::firing(BattleShip::player *opponent) {
     bool is_hit = false;
-    auto target_crd = pop_random_coord(coords);
+    auto target_crd = pop_random_coord(&coords);
     opponent->getBoard()->hit(target_crd.x, target_crd.y, &is_hit);
     show_fire_result(opponent, target_crd.x, target_crd.y, is_hit);
 }
 
-BattleShip::coord BattleShip::random_ai_player::pop_random_coord(vector<coord> v) {
-    auto itr = v.begin();
-    std::uniform_int_distribution<int> distribution{0, static_cast<int>(v.size() - 1)};
-    auto elementPos = distribution(rand_generator);
+BattleShip::coord BattleShip::random_ai_player::pop_random_coord(vector<coord> *v) {
+    auto itr = v->begin();
+    std::uniform_int_distribution<int> distribution{0, static_cast<int>(v->size() - 1)};
+    auto elementPos = distribution(ai_player::rand_generator);
     std::advance(itr, elementPos);
     BattleShip::coord pick(*itr);
-    v.erase(itr);
+    v->erase(itr);
     return pick;
 }
 
@@ -104,7 +112,7 @@ void BattleShip::hunt_destroy_ai_player::firing(BattleShip::player *opponent) {
     bool is_hit = false;
     coord target_crd;
     if (mode == HUNT_MODE) {
-        target_crd = pop_random_coord(hunt_targets);
+        target_crd = pop_random_coord(&hunt_targets);
         opponent->getBoard()->hit(target_crd.x, target_crd.y, &is_hit);
         show_fire_result(opponent, target_crd.x, target_crd.y, is_hit);
     } else if (mode == DESTROY_MODE) {

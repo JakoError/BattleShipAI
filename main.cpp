@@ -6,7 +6,9 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (argc == 3) {
-        BattleShip::ai_player::set_random_seed(strtol(argv[2], nullptr, 10));
+        BattleShip::ai_player::set_random_seed((int)strtol(argv[2], nullptr, 10));
+    } else {
+        BattleShip::ai_player::set_random_seed((int) time(nullptr));
     }
 
     auto this_game = BattleShip::game(argv[1]);

@@ -8,8 +8,6 @@
 
 
 namespace BattleShip {
-    static std::minstd_rand rand_generator;
-
     /**
      * AI player
      */
@@ -35,6 +33,8 @@ namespace BattleShip {
         static string get_ai_name();
 
         void place_ship() override;
+
+        static std::mt19937 rand_generator;
     };
 
     /**
@@ -64,7 +64,7 @@ namespace BattleShip {
         using ai_player::ai_player;
         vector<BattleShip::coord> coords;
 
-        static coord pop_random_coord(vector<coord> v);
+        static coord pop_random_coord(vector<coord>* v);
 
     private:
 
